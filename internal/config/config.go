@@ -12,6 +12,7 @@ type Config struct {
 type Bot struct {
 	Port  string `env:"JARVIS_PORT"`
 	Token string `env:"JARVIS_TOKEN"`
+	Url   string `env:"JARVIS_URL"`
 }
 
 func MustLoadConfig() *Config {
