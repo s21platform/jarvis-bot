@@ -63,7 +63,7 @@ func (b *Bot) Listen() {
 						message = fmt.Sprintf("Сам фронтендер")
 					} else {
 						// TODO это временный else чтобы бот хоть что то отвечал
-						message = fmt.Sprintf("Здравствуй, %s! В будущем, когда научусь, я создам таску с типом %s и заголовком ей сделаю: '%s'", user.Username, cmd.Name, cmd.Cmd)
+						message = fmt.Sprintf("Здравствуй, %s! В будущем, когда научусь, я создам таску с типом **%s** и заголовком ей сделаю: '%s'", user.Username, cmd.Name, cmd.Cmd)
 					}
 
 					sPost := &model.Post{
