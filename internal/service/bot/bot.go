@@ -53,15 +53,19 @@ func (b *Bot) Listen() {
 					if post.RootId != "" {
 						rootId = post.RootId
 					}
+					user, _, _ := b.client.GetUser(post.UserId, "")
 
 					cmd, err := parseCommand(post.Message)
 					if err != nil {
 						log.Printf("Failed to parse command: %v", err)
-						continue
-						//message = fmt.Sprintf("Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужно, пиши ~garroshm")
+						message = fmt.Sprintf("Привет, %s! Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужно, пиши @garroshm", user.Username)
+					} else if user.Username == "casimira" {
+						message = fmt.Sprintf("Сам фронтендер")
+					} else {
+						// TODO это временный else чтобы бот хоть что то отвечал
+						message = fmt.Sprintf("Здравствуй, %s! В будущем, когда научусь, я создам таску с типом %s и заголовком ей сделаю: '%s'", user.Username, cmd.Name, cmd.Cmd)
 					}
 
-					message = fmt.Sprintf("В будущем, когда научусь, я создам таску с типом %s и Заголовком ей сделаю: %s", cmd.Name, cmd.Cmd)
 					sPost := &model.Post{
 						Message:   message,
 						RootId:    rootId,
