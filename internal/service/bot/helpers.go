@@ -2,7 +2,6 @@ package bot
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"strings"
 )
@@ -22,13 +21,23 @@ func getPost(event *model.WebSocketEvent) (*model.Post, error) {
 	return post, nil
 }
 
-func parseCommand(message string) (*Command, error) {
+func parseCommand(message string) *Command {
 	parts := strings.Fields(strings.Replace(message, "@jarvis", "", 1))
-	if len(parts) < 2 {
-		return nil, errors.New("invalid command")
+	var cmd string
+	var name string
+	switch len(parts) {
+	case 0:
+		name = "help"
+		cmd = ""
+	case 1:
+		name = parts[0]
+		cmd = ""
+	default:
+		name = parts[0]
+		cmd = strings.Join(parts[1:], " ")
 	}
 	return &Command{
-		Name: parts[0],
-		Cmd:  strings.Join(parts[1:], " "),
-	}, nil
+		Name: name,
+		Cmd:  cmd,
+	}
 }

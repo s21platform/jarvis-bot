@@ -55,15 +55,24 @@ func (b *Bot) Listen() {
 					}
 					user, _, _ := b.client.GetUser(post.UserId, "")
 
-					cmd, err := parseCommand(post.Message)
-					if err != nil {
-						log.Printf("Failed to parse command: %v", err)
-						message = fmt.Sprintf("Привет, %s! Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужно, пиши @garroshm", user.Username)
-					} else if user.Username == "casimira" {
-						message = fmt.Sprintf("Сам фронтендер")
-					} else {
-						// TODO это временный else чтобы бот хоть что то отвечал
-						message = fmt.Sprintf("Здравствуй, %s! В будущем, когда научусь, я создам таску с типом **%s** и заголовком ей сделаю: '%s'", user.Username, cmd.Name, cmd.Cmd)
+					cmd := parseCommand(post.Message)
+
+					switch cmd.Name {
+					case "help":
+						message = "Привет! Это мой --help. Сейчас я знаю команды:\n" +
+							"- feature <name_of_feature>\n" +
+							"- bug <name_of_bug>\n" +
+							"bug или feature создаются в ClickUp команде, в чате которой меня просят завести баг или фичу"
+					case "feature":
+						message = fmt.Sprintf("В будущем, когда научусь, я создам таску с типом **feature** и заголовком ей сделаю: '%s'", cmd.Cmd)
+					case "bug":
+						message = fmt.Sprintf("В будущем, когда научусь, я создам таску с типом **bug** и заголовком ей сделаю: '%s'", cmd.Cmd)
+					default:
+						message = fmt.Sprintf("Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm")
+					}
+
+					if cmd.Name == "" {
+						message = fmt.Sprintf("Привет, %s! Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужно, пиши @garroshm. А весь доступный функционал ты можешь узнать по команде **help**", user.Username)
 					}
 
 					sPost := &model.Post{
