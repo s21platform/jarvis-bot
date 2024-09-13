@@ -43,7 +43,7 @@ jobs:
     needs: test
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Yandex CR Login
         uses: yc-actions/yc-cr-login@v0.1-alpha
         with:
