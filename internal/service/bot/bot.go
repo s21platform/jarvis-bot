@@ -54,6 +54,12 @@ func (b *Bot) Listen() {
 						rootId = post.RootId
 					}
 					user, _, _ := b.client.GetUser(post.UserId, "")
+					channel, _, err := b.client.GetChannel(post.ChannelId, "")
+					if err != nil {
+						log.Printf("Failed to get channel: %v", err)
+						continue
+					}
+					log.Println("[ CHANNEL ID ]", channel.Name)
 
 					cmd := parseCommand(post.Message)
 
