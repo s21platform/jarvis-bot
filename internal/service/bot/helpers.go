@@ -73,11 +73,26 @@ func CreateTable(headers []string, rows [][]string) string {
 	return builder.String()
 }
 
-func ConvertModelToString(t []servicemodel.TasksByUUID) [][]string {
+func convertModelToString(t []servicemodel.TasksByUUID) [][]string {
 	result := make([][]string, len(t))
 	for i, val := range t {
-		description := strings.Replace(val.TaskDescription, "\\n", " ", -1)
+		description := ""
+		if val.TaskDescription != nil {
+			description = strings.Replace(*val.TaskDescription, "\\n", " ", -1)
+		}
 		result[i] = []string{strconv.FormatInt(val.ID, 10), val.TaskTitle, description, val.TaskType}
+	}
+	return result
+}
+
+func convertModelAllTasksToString(t []servicemodel.TasksByChannel) [][]string {
+	result := make([][]string, len(t))
+	for i, val := range t {
+		description := ""
+		if val.TaskDescription != nil {
+			description = strings.Replace(*val.TaskDescription, "\\n", " ", -1)
+		}
+		result[i] = []string{strconv.FormatInt(val.ID, 10), val.Assignee, val.TaskTitle, description, val.TaskType}
 	}
 	return result
 }

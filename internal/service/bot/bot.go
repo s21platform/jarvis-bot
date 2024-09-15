@@ -68,9 +68,9 @@ func (b *Bot) Listen() {
 					switch cmd.Name {
 					case "help":
 						message = "Привет! Это мой --help. Сейчас я знаю команды:\n" +
-							"- feature <name_of_feature>\n" +
-							"- bug <name_of_bug>\n" +
-							"bug или feature создаются в ClickUp команде, в чате которой меня просят завести баг или фичу"
+							"- feature <name_of_feature>\t[Создает фичу для текущего сервиса]\n" +
+							"- bug <name_of_bug>\t[Создает баг для текущего сервиса]\n" +
+							"- my \t[Показывет таски инициатора в данном сервисе]\n"
 					case "feature":
 						id, err := b.dbR.CreateTask(channel.Name, "feature", cmd.Cmd, post.UserId)
 						if err != nil {
@@ -86,7 +86,14 @@ func (b *Bot) Listen() {
 							log.Printf("Failed to get tasks: %v", err)
 							continue
 						}
-						message = CreateTable([]string{"ID", "Таска", "Описание", "Тип"}, ConvertModelToString(tasks))
+						message = CreateTable([]string{"ID", "Таска", "Описание", "Тип"}, convertModelToString(tasks))
+					case "tasks":
+						tasks, err := b.dbR.GetTasksByChannel(channel.Name)
+						if err != nil {
+							log.Printf("Failed to get tasks: %v", err)
+							continue
+						}
+						message = CreateTable([]string{"ID", "Исполнитель", "Таска", "Описание", "Тип"}, convertModelAllTasksToString(tasks))
 					default:
 						message = fmt.Sprintf("Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm")
 					}

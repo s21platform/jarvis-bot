@@ -76,3 +76,30 @@ func (p *Postgres) GetTasksByUUID(assignee, service string) ([]model.TasksByUUID
 	}
 	return tasksByUUID, nil
 }
+
+func (p *Postgres) GetTasksByChannel(service string) ([]model.TasksByChannel, error) {
+	query, args, err := sq.Select(
+		"id",
+		`task_type`,
+		`task_title`,
+		`task_description`,
+		`assignee`,
+	).
+		From("tasks").
+		Where(
+			sq.Eq{"service": service},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var tasksByChannel []model.TasksByChannel
+	err = p.conn.Select(&tasksByChannel, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return tasksByChannel, nil
+}
