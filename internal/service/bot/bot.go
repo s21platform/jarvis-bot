@@ -86,7 +86,7 @@ func (b *Bot) Listen() {
 							log.Printf("Failed to get tasks: %v", err)
 							continue
 						}
-						message = CreateTable([]string{"ID", "Таска", "Тип"}, ConvertModelToString(tasks))
+						message = CreateTable([]string{"ID", "Таска", "Описание", "Тип"}, ConvertModelToString(tasks))
 					default:
 						message = fmt.Sprintf("Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm")
 					}

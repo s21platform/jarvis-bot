@@ -76,7 +76,8 @@ func CreateTable(headers []string, rows [][]string) string {
 func ConvertModelToString(t []servicemodel.TasksByUUID) [][]string {
 	result := make([][]string, len(t))
 	for i, val := range t {
-		result[i] = []string{strconv.FormatInt(val.ID, 10), val.TaskTitle, val.TaskType}
+		description := strings.Replace(val.TaskDescription, "\\n", " ", -1)
+		result[i] = []string{strconv.FormatInt(val.ID, 10), val.TaskTitle, description, val.TaskType}
 	}
 	return result
 }

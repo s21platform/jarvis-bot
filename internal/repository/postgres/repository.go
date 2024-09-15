@@ -55,6 +55,7 @@ func (p *Postgres) GetTasksByUUID(assignee, service string) ([]model.TasksByUUID
 		"id",
 		`task_type`,
 		`task_title`,
+		`task_description`,
 	).
 		From("tasks").
 		Where(sq.And{
