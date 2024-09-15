@@ -3,6 +3,8 @@ package bot
 import (
 	"encoding/json"
 	"github.com/mattermost/mattermost-server/v6/model"
+	servicemodel "github.com/s21platform/jarvis-bot/internal/model"
+	"strconv"
 	"strings"
 )
 
@@ -40,4 +42,41 @@ func parseCommand(message string) *Command {
 		Name: name,
 		Cmd:  cmd,
 	}
+}
+
+func CreateTable(headers []string, rows [][]string) string {
+	var builder strings.Builder
+
+	// Создаем строку заголовков
+	builder.WriteString("|")
+	for _, header := range headers {
+		builder.WriteString(" " + header + " |")
+	}
+	builder.WriteString("\n")
+
+	// Создаем разделитель
+	builder.WriteString("|")
+	for range headers {
+		builder.WriteString("------------|")
+	}
+	builder.WriteString("\n")
+
+	// Добавляем строки данных
+	for _, row := range rows {
+		builder.WriteString("|")
+		for _, cell := range row {
+			builder.WriteString(" " + cell + " |")
+		}
+		builder.WriteString("\n")
+	}
+
+	return builder.String()
+}
+
+func ConvertModelToString(t []servicemodel.TasksByUUID) [][]string {
+	result := make([][]string, len(t))
+	for i, val := range t {
+		result[i] = []string{strconv.FormatInt(val.ID, 10), val.TaskTitle, val.TaskType}
+	}
+	return result
 }

@@ -12,9 +12,10 @@ type Bot struct {
 	websocket *model.WebSocketClient
 	client    *model.Client4
 	user      *model.User
+	dbR       DbRepo
 }
 
-func New(cfg *config.Config) *Bot {
+func New(cfg *config.Config, dbR DbRepo) *Bot {
 	client := model.NewAPIv4Client(cfg.Url)
 	client.SetOAuthToken(cfg.Token)
 
@@ -33,6 +34,7 @@ func New(cfg *config.Config) *Bot {
 		websocket: websocketClient,
 		client:    client,
 		user:      user,
+		dbR:       dbR,
 	}
 }
 
@@ -70,9 +72,21 @@ func (b *Bot) Listen() {
 							"- bug <name_of_bug>\n" +
 							"bug или feature создаются в ClickUp команде, в чате которой меня просят завести баг или фичу"
 					case "feature":
-						message = fmt.Sprintf("В будущем, когда научусь, я создам таску с типом **feature** и заголовком ей сделаю: '%s'", cmd.Cmd)
+						id, err := b.dbR.CreateTask(channel.Name, "feature", cmd.Cmd, post.UserId)
+						if err != nil {
+							log.Printf("Failed to create feature: %v", err)
+							continue
+						}
+						message = fmt.Sprintf("Создал feature с заголовком: %s, для сервиса %s с id: %d", cmd.Cmd, channel.Name, id)
 					case "bug":
 						message = fmt.Sprintf("В будущем, когда научусь, я создам таску с типом **bug** и заголовком ей сделаю: '%s'", cmd.Cmd)
+					case "my":
+						tasks, err := b.dbR.GetTasksByUUID(post.UserId, channel.Name)
+						if err != nil {
+							log.Printf("Failed to get tasks: %v", err)
+							continue
+						}
+						message = CreateTable([]string{"ID", "Таска", "Тип"}, ConvertModelToString(tasks))
 					default:
 						message = fmt.Sprintf("Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm")
 					}
