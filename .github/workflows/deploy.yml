@@ -52,6 +52,8 @@ jobs:
         run: |
           docker build -t ${{ secrets.CR_REGISTRY }}/${{ secrets.CR_NAME }}:prod .
           docker push ${{ secrets.CR_REGISTRY }}/${{ secrets.CR_NAME }}:prod
+          docker build -t ${{ secrets.CR_REGISTRY }}/${{ secrets.CR_NAME }}-migrate:prod ./migrations
+          docker push ${{ secrets.CR_REGISTRY }}/${{ secrets.CR_NAME }}-migrate:prod
   deploy:
     runs-on: ubuntu-latest
     needs: build_and_push
