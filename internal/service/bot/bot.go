@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"context"
 	"fmt"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/s21platform/jarvis-bot/internal/config"
@@ -42,6 +43,7 @@ func (b *Bot) Listen() {
 	go func() {
 		//time.Sleep(2 * time.Second)
 		for event := range b.websocket.EventChannel {
+			ctx := context.Background()
 			if event.EventType() == model.WebsocketEventPosted {
 				post, err := getPost(event)
 				if err != nil {
@@ -68,32 +70,39 @@ func (b *Bot) Listen() {
 					switch cmd.Name {
 					case "help":
 						message = "Привет! Это мой --help. Сейчас я знаю команды:\n" +
-							"- feature <name_of_feature>\t[Создает фичу для текущего сервиса]\n" +
-							"- bug <name_of_bug>\t[Создает баг для текущего сервиса]\n" +
-							"- my \t[Показывет таски инициатора в данном сервисе]\n"
-					case "feature":
-						id, err := b.dbR.CreateTask(channel.Name, "feature", cmd.Cmd, post.UserId)
+							"- cred <service_name>\t[Получить креды сервиса]\n"
+						//"- feature <name_of_feature>\t[Создает фичу для текущего сервиса]\n" +
+						//"- bug <name_of_bug>\t[Создает баг для текущего сервиса]\n" +
+						//"- my \t[Показывет таски инициатора в данном сервисе]\n"
+					case "cred":
+						creds, err := b.dbR.GetCred(ctx, cmd.Cmd)
 						if err != nil {
-							log.Printf("Failed to create feature: %v", err)
-							continue
+							log.Printf("Failed to get creds: %v", err)
 						}
-						message = fmt.Sprintf("Создал feature с заголовком: %s, для сервиса %s с id: %d", cmd.Cmd, channel.Name, id)
-					case "bug":
-						message = fmt.Sprintf("В будущем, когда научусь, я создам таску с типом **bug** и заголовком ей сделаю: '%s'", cmd.Cmd)
-					case "my":
-						tasks, err := b.dbR.GetTasksByUUID(post.UserId, channel.Name)
-						if err != nil {
-							log.Printf("Failed to get tasks: %v", err)
-							continue
-						}
-						message = CreateTable([]string{"ID", "Таска", "Описание", "Тип"}, convertModelToString(tasks))
-					case "tasks":
-						tasks, err := b.dbR.GetTasksByChannel(channel.Name)
-						if err != nil {
-							log.Printf("Failed to get tasks: %v", err)
-							continue
-						}
-						message = CreateTable([]string{"ID", "Исполнитель", "Таска", "Описание", "Тип"}, convertModelAllTasksToString(tasks))
+						message = CreateTable([]string{"Cred Name", "Value"}, convertCredsToString(creds.Creds))
+					//case "feature":
+					//	id, err := b.dbR.CreateTask(channel.Name, "feature", cmd.Cmd, post.UserId)
+					//	if err != nil {
+					//		log.Printf("Failed to create feature: %v", err)
+					//		continue
+					//	}
+					//	message = fmt.Sprintf("Создал feature с заголовком: %s, для сервиса %s с id: %d", cmd.Cmd, channel.Name, id)
+					//case "bug":
+					//	message = fmt.Sprintf("В будущем, когда научусь, я создам таску с типом **bug** и заголовком ей сделаю: '%s'", cmd.Cmd)
+					//case "my":
+					//	tasks, err := b.dbR.GetTasksByUUID(post.UserId, channel.Name)
+					//	if err != nil {
+					//		log.Printf("Failed to get tasks: %v", err)
+					//		continue
+					//	}
+					//	message = CreateTable([]string{"ID", "Таска", "Описание", "Тип"}, convertModelToString(tasks))
+					//case "tasks":
+					//	tasks, err := b.dbR.GetTasksByChannel(channel.Name)
+					//	if err != nil {
+					//		log.Printf("Failed to get tasks: %v", err)
+					//		continue
+					//	}
+					//	message = CreateTable([]string{"ID", "Исполнитель", "Таска", "Описание", "Тип"}, convertModelAllTasksToString(tasks))
 					default:
 						message = fmt.Sprintf("Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm")
 					}

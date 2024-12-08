@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -29,77 +31,28 @@ func (p *Postgres) Close() {
 	_ = p.conn.Close()
 }
 
-func (p *Postgres) CreateTask(channelName, taskType, taskTitle, assignee string) (int64, error) {
-	query, args, err := sq.Insert("tasks").
-		Columns("service", "task_type", "task_title", "assignee").
-		Values(channelName, taskType, taskTitle, assignee).
-		Suffix("RETURNING id").
+func (p *Postgres) GetCred(ctx context.Context, name string) (model.Data, error) {
+	query, args, err := sq.Select(`data`).
+		From(`credentials`).
+		Where(sq.Eq{"service": name}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
 	if err != nil {
-		return 0, err
+		return model.Data{}, fmt.Errorf("failed to build query: %w", err)
 	}
 
-	var insertedID int64
-	err = p.conn.QueryRow(query, args...).Scan(&insertedID)
+	var credData model.CredData
+	err = p.conn.GetContext(ctx, &credData, query, args...)
 	if err != nil {
-		return 0, err
+		return model.Data{}, fmt.Errorf("failed to get credentials from db: %w", err)
 	}
 
-	return insertedID, nil
-}
-
-func (p *Postgres) GetTasksByUUID(assignee, service string) ([]model.TasksByUUID, error) {
-	query, args, err := sq.Select(
-		"id",
-		`task_type`,
-		`task_title`,
-		`task_description`,
-	).
-		From("tasks").
-		Where(sq.And{
-			sq.Eq{"assignee": assignee},
-			sq.Eq{"service": service},
-		}).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-
+	var data model.Data
+	err = json.Unmarshal(credData.Data, &data)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
-	var tasksByUUID []model.TasksByUUID
-	err = p.conn.Select(&tasksByUUID, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	return tasksByUUID, nil
-}
-
-func (p *Postgres) GetTasksByChannel(service string) ([]model.TasksByChannel, error) {
-	query, args, err := sq.Select(
-		"id",
-		`task_type`,
-		`task_title`,
-		`task_description`,
-		`assignee`,
-	).
-		From("tasks").
-		Where(
-			sq.Eq{"service": service},
-		).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-
-	if err != nil {
-		return nil, err
-	}
-
-	var tasksByChannel []model.TasksByChannel
-	err = p.conn.Select(&tasksByChannel, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	return tasksByChannel, nil
+	return data, nil
 }

@@ -1,12 +1,10 @@
 -- +goose Up
 
-CREATE TABLE IF NOT EXISTS tasks (
+CREATE TABLE IF NOT EXISTS credentials (
     id SERIAL PRIMARY KEY,
     service VARCHAR,
-    task_type VARCHAR,
-    task_title VARCHAR,
-    assignee VARCHAR
+    data  JSONB
 );
 
 -- +goose Down
-DROP TABLE IF EXISTS tasks;
+DROP TABLE IF EXISTS credentials;

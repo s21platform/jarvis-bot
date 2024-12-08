@@ -73,6 +73,14 @@ func CreateTable(headers []string, rows [][]string) string {
 	return builder.String()
 }
 
+func convertCredsToString(t []servicemodel.Cred) [][]string {
+	result := make([][]string, len(t))
+	for i, val := range t {
+		result[i] = []string{val.Name, val.Value}
+	}
+	return result
+}
+
 func convertModelToString(t []servicemodel.TasksByUUID) [][]string {
 	result := make([][]string, len(t))
 	for i, val := range t {
