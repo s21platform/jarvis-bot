@@ -2,6 +2,8 @@ package bot
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/s21platform/jarvis-bot/internal/config"
@@ -77,9 +79,14 @@ func (b *Bot) Listen() {
 					case "cred":
 						creds, err := b.dbR.GetCred(ctx, cmd.Cmd)
 						if err != nil {
-							log.Printf("Failed to get creds: %v", err)
+							if errors.Is(err, sql.ErrNoRows) {
+								message = "Сервис не найден"
+							} else {
+								log.Printf("Failed to get creds: %v", err)
+							}
+						} else {
+							message = CreateTable([]string{"Cred Name", "Value"}, convertCredsToString(creds.Creds))
 						}
-						message = CreateTable([]string{"Cred Name", "Value"}, convertCredsToString(creds.Creds))
 					//case "feature":
 					//	id, err := b.dbR.CreateTask(channel.Name, "feature", cmd.Cmd, post.UserId)
 					//	if err != nil {

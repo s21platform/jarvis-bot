@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -45,13 +47,16 @@ func (p *Postgres) GetCred(ctx context.Context, name string) (model.Data, error)
 	var credData model.CredData
 	err = p.conn.GetContext(ctx, &credData, query, args...)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.Data{}, sql.ErrNoRows
+		}
 		return model.Data{}, fmt.Errorf("failed to get credentials from db: %w", err)
 	}
 
 	var data model.Data
 	err = json.Unmarshal(credData.Data, &data)
 	if err != nil {
-		log.Fatal(err)
+		return model.Data{}, fmt.Errorf("failed to unmarshal cred: %w", err)
 	}
 
 	return data, nil
