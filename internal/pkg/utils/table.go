@@ -21,13 +21,20 @@ func cleanCell(text string) string {
 	// Очищаем MD разметку
 	text = cleanMarkdown(text)
 
-	// Если в тексте есть "читать далее", оставляем только текст до него
-	if idx := strings.Index(text, "читать далее"); idx != -1 {
-		text = strings.TrimSpace(text[:idx])
-	}
-
 	// Если в тексте есть "|", заменяем на "-"
 	text = strings.ReplaceAll(text, "|", "-")
+
+	// Если в тексте есть ссылка "читать далее", оставляем её в конце
+	if idx := strings.Index(text, "[читать далее]"); idx != -1 {
+		linkStart := idx
+		linkEnd := strings.Index(text[linkStart:], ")")
+		if linkEnd != -1 {
+			linkEnd += linkStart + 1 // +1 чтобы включить закрывающую скобку
+			beforeLink := strings.TrimSpace(text[:linkStart])
+			link := text[linkStart:linkEnd]
+			return beforeLink + " " + link
+		}
+	}
 
 	return text
 }
