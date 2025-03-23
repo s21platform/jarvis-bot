@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS news (
     UNIQUE(thread_id)
 );
 
+
 -- +goose Down
 DROP TABLE IF EXISTS news; 
