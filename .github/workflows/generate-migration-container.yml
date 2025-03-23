@@ -1,6 +1,6 @@
 name: Generate migrate container
 on:
-  pull_request:
+  push:
     paths:
       - "migrations/**"
     branches:
