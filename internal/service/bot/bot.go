@@ -1,24 +1,24 @@
 package bot
 
 import (
-	"context"
-	"database/sql"
-	"errors"
 	"fmt"
-	"github.com/mattermost/mattermost-server/v6/model"
-	"github.com/s21platform/jarvis-bot/internal/config"
 	"log"
 	"strings"
+
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/s21platform/jarvis-bot/internal/config"
+	"github.com/s21platform/jarvis-bot/internal/pkg/parser"
+	"github.com/s21platform/jarvis-bot/internal/pkg/types"
 )
 
 type Bot struct {
-	websocket *model.WebSocketClient
-	client    *model.Client4
-	user      *model.User
-	dbR       DbRepo
+	websocket  *model.WebSocketClient
+	client     *model.Client4
+	user       *model.User
+	cmdFactory CommandFactory
 }
 
-func New(cfg *config.Config, dbR DbRepo) *Bot {
+func New(cfg *config.Config, cmdFactory CommandFactory) *Bot {
 	client := model.NewAPIv4Client(cfg.Url)
 	client.SetOAuthToken(cfg.Token)
 
@@ -33,28 +33,29 @@ func New(cfg *config.Config, dbR DbRepo) *Bot {
 		log.Fatalf("Ошибка подключения к WebSocket: %v", err)
 	}
 
-	return &Bot{
-		websocket: websocketClient,
-		client:    client,
-		user:      user,
-		dbR:       dbR,
+	bot := &Bot{
+		websocket:  websocketClient,
+		client:     client,
+		user:       user,
+		cmdFactory: cmdFactory,
 	}
+
+	return bot
 }
 
 func (b *Bot) Listen() {
 	go func() {
 		//time.Sleep(2 * time.Second)
 		for event := range b.websocket.EventChannel {
-			ctx := context.Background()
 			if event.EventType() == model.WebsocketEventPosted {
-				post, err := getPost(event)
+				post, err := parser.GetPost(event)
 				if err != nil {
 					log.Printf("Failed to get post: %v", err)
+					continue
 				}
 
 				// Обработка сценария упоминания бота
 				if strings.Contains(post.Message, "@"+b.user.Username) {
-					var message string
 					rootId := post.Id
 					if post.RootId != "" {
 						rootId = post.RootId
@@ -67,55 +68,31 @@ func (b *Bot) Listen() {
 					}
 					log.Println("[ CHANNEL ID ]", channel.Name)
 
-					cmd := parseCommand(post.Message)
-
-					switch cmd.Name {
-					case "help":
-						message = "Привет! Это мой --help. Сейчас я знаю команды:\n" +
-							"- cred <service_name>\t[Получить креды сервиса]\n"
-						//"- feature <name_of_feature>\t[Создает фичу для текущего сервиса]\n" +
-						//"- bug <name_of_bug>\t[Создает баг для текущего сервиса]\n" +
-						//"- my \t[Показывет таски инициатора в данном сервисе]\n"
-					case "cred":
-						creds, err := b.dbR.GetCred(ctx, cmd.Cmd)
-						if err != nil {
-							if errors.Is(err, sql.ErrNoRows) {
-								message = "Сервис не найден"
-							} else {
-								log.Printf("Failed to get creds: %v", err)
-							}
-						} else {
-							message = CreateTable([]string{"Cred Name", "Value"}, convertCredsToString(creds.Creds))
-						}
-					//case "feature":
-					//	id, err := b.dbR.CreateTask(channel.Name, "feature", cmd.Cmd, post.UserId)
-					//	if err != nil {
-					//		log.Printf("Failed to create feature: %v", err)
-					//		continue
-					//	}
-					//	message = fmt.Sprintf("Создал feature с заголовком: %s, для сервиса %s с id: %d", cmd.Cmd, channel.Name, id)
-					//case "bug":
-					//	message = fmt.Sprintf("В будущем, когда научусь, я создам таску с типом **bug** и заголовком ей сделаю: '%s'", cmd.Cmd)
-					//case "my":
-					//	tasks, err := b.dbR.GetTasksByUUID(post.UserId, channel.Name)
-					//	if err != nil {
-					//		log.Printf("Failed to get tasks: %v", err)
-					//		continue
-					//	}
-					//	message = CreateTable([]string{"ID", "Таска", "Описание", "Тип"}, convertModelToString(tasks))
-					//case "tasks":
-					//	tasks, err := b.dbR.GetTasksByChannel(channel.Name)
-					//	if err != nil {
-					//		log.Printf("Failed to get tasks: %v", err)
-					//		continue
-					//	}
-					//	message = CreateTable([]string{"ID", "Исполнитель", "Таска", "Описание", "Тип"}, convertModelAllTasksToString(tasks))
-					default:
-						message = fmt.Sprintf("Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm")
-					}
+					cmd := parser.ParseCommand(post.Message)
+					var message string
 
 					if cmd.Name == "" {
-						message = fmt.Sprintf("Привет, %s! Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужно, пиши @garroshm. А весь доступный функционал ты можешь узнать по команде **help**", user.Username)
+						message = fmt.Sprintf("Привет, %s! Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm. А весь доступный функционал ты можешь узнать по команде **help**", user.Username)
+					} else {
+						command := b.cmdFactory.GetCommand(cmd.Name)
+						if command == nil {
+							message = "Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm"
+						} else {
+							// Устанавливаем контекст команды
+							cmdCtx := &types.CommandContext{
+								Post:    post,
+								Channel: channel,
+								User:    user,
+							}
+							command.SetContext(cmdCtx)
+
+							var err error
+							message, err = command.Execute(cmd.Cmd)
+							if err != nil {
+								log.Printf("Failed to execute command: %v", err)
+								message = fmt.Sprintf("Произошла ошибка при выполнении команды: %v", err)
+							}
+						}
 					}
 
 					sPost := &model.Post{
