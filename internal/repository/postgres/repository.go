@@ -156,3 +156,63 @@ func (p *Postgres) IsNewsExists(ctx context.Context, threadID string) (bool, err
 
 	return exists, nil
 }
+
+func (p *Postgres) GetBirthday(ctx context.Context, userId string) (*model.Birthday, error) {
+	query, args, err := sq.Select(
+		`day`,
+		`month`,
+		`year`,
+	).From(`staff_birthday`).
+		Where(sq.Eq{"user_id": userId}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to build query: %w", err)
+	}
+
+	var birthday model.Birthday
+	err = p.conn.GetContext(ctx, &birthday, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get birthday: %w", err)
+	}
+	return &birthday, nil
+}
+
+func (p *Postgres) SetBirthday(ctx context.Context, birthday *model.Birthday, userId string, channelId string, nickname string) error {
+	columns := []string{
+		"user_id",
+		"nickname",
+		"channel_id",
+		"day",
+		"month",
+	}
+	values := []interface{}{
+		userId,
+		nickname,
+		channelId,
+		birthday.Day,
+		birthday.Month,
+	}
+
+	if birthday.Year != nil {
+		columns = append(columns, "year")
+		values = append(values, *birthday.Year)
+	}
+
+	queryBuilder := sq.Insert("staff_birthday").
+		Columns(columns...).
+		Values(values...).
+		PlaceholderFormat(sq.Dollar)
+
+	query, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build query: %w", err)
+	}
+
+	_, err = p.conn.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to set birthday: %w", err)
+	}
+	return nil
+}

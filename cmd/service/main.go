@@ -1,1 +1,26 @@
-package service
+package main
+
+import (
+	"fmt"
+	"github.com/go-chi/chi/v5"
+	"github.com/s21platform/jarvis-bot/internal/api"
+	"github.com/s21platform/jarvis-bot/internal/config"
+	api2 "github.com/s21platform/jarvis-bot/internal/generated"
+	"github.com/s21platform/jarvis-bot/internal/repository/postgres"
+	"log"
+	"net/http"
+)
+
+func main() {
+	cfg := config.MustLoadConfig()
+
+	repo := postgres.New(cfg)
+	h := api.New(cfg, repo)
+
+	r := chi.NewRouter()
+
+	api2.HandlerFromMux(h, r)
+
+	log.Println("Starting server", cfg.Service.Port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", cfg.Service.Port), r))
+}

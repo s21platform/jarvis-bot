@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Bot
 	Postgres
+	Service
 }
 
 type Bot struct {
@@ -23,6 +24,10 @@ type Postgres struct {
 	Database string `env:"JARVIS_BOT_POSTGRES_DB"`
 	Host     string `env:"JARVIS_BOT_POSTGRES_HOST"`
 	Port     string `env:"JARVIS_BOT_POSTGRES_PORT"`
+}
+
+type Service struct {
+	Port string `env:"JARVIS_BOT_SERVICE_PORT"`
 }
 
 func MustLoadConfig() *Config {
