@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Bot
 	Postgres
+	Jira
 }
 
 type Bot struct {
@@ -23,6 +24,12 @@ type Postgres struct {
 	Database string `env:"JARVIS_BOT_POSTGRES_DB"`
 	Host     string `env:"JARVIS_BOT_POSTGRES_HOST"`
 	Port     string `env:"JARVIS_BOT_POSTGRES_PORT"`
+}
+
+type Jira struct {
+	Username string `env:"JARVIS_BOT_EMAIL"`
+	Password string `env:"JARVIS_BOT_PASSWORD"`
+	BaseUrl  string `env:"JIRA_BASE_URL"`
 }
 
 func MustLoadConfig() *Config {
