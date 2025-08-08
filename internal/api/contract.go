@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/s21platform/jarvis-bot/internal/model"
 )
 
