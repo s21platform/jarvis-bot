@@ -10,6 +10,7 @@ import (
 
 type Jira struct {
 	*jira.Client
+	baseURL string
 }
 
 func New(cfg *config.Config) *Jira {
@@ -23,7 +24,8 @@ func New(cfg *config.Config) *Jira {
 		log.Fatal(err)
 	}
 	return &Jira{
-		client,
+		Client:  client,
+		baseURL: cfg.Jira.BaseUrl,
 	}
 }
 
@@ -37,22 +39,29 @@ func (j *Jira) GetProjects() {
 	}
 }
 
+// CreateIssue создает новую задачу в Jira
 func (j *Jira) CreateIssue(title string, issueType string, projectKey string) (string, error) {
-	issue := &jira.Issue{
+	i := jira.Issue{
 		Fields: &jira.IssueFields{
+			Project: jira.Project{
+				Key: projectKey,
+			},
 			Summary: title,
 			Type: jira.IssueType{
 				Name: issueType,
 			},
-			Project: jira.Project{
-				Key: projectKey,
-			},
 		},
 	}
 
-	resp, _, err := j.Issue.Create(issue)
+	issue, _, err := j.Issue.Create(&i)
 	if err != nil {
 		return "", err
 	}
-	return resp.Key, nil
+
+	return issue.Key, nil
+}
+
+// GetBaseURL возвращает базовый URL Jira
+func (j *Jira) GetBaseURL() string {
+	return j.baseURL
 }

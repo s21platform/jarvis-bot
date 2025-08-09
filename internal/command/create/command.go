@@ -75,7 +75,7 @@ func (c *Command) handleTask(title string) (string, error) {
 		return "", fmt.Errorf("failed to create jira task: %w", err)
 	}
 
-	return fmt.Sprintf("Создана задача %s", key), nil
+	return fmt.Sprintf("Создана задача [%s](%s/browse/%s) :bulb:", key, c.jC.GetBaseURL(), key), nil
 }
 
 // handleBug обрабатывает создание бага
@@ -94,5 +94,5 @@ func (c *Command) handleBug(title string) (string, error) {
 		return "", fmt.Errorf("failed to create jira bug: %w", err)
 	}
 
-	return fmt.Sprintf("Создан баг %s", key), nil
+	return fmt.Sprintf("Создан баг [%s](%s/browse/%s) :ladybug:", key, c.jC.GetBaseURL(), key), nil
 }
