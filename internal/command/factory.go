@@ -2,6 +2,7 @@ package command
 
 import (
 	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/s21platform/jarvis-bot/internal/command/create"
 	"github.com/s21platform/jarvis-bot/internal/command/cred"
 	"github.com/s21platform/jarvis-bot/internal/command/help"
 	"github.com/s21platform/jarvis-bot/internal/command/news"
@@ -23,11 +24,13 @@ func NewFactory(client *model.Client4, user *model.User, db bot.DbRepo) *Factory
 	// Создаем команды
 	credCmd := cred.NewCommand(db)
 	newsCmd := news.NewCommand(client, db, user.Id)
+	createCmd := create.NewCommand(db)
 
 	// Добавляем команды в map
 	commands := []types.Command{
 		credCmd,
 		newsCmd,
+		createCmd,
 	}
 
 	// Создаем help команду со списком всех команд
