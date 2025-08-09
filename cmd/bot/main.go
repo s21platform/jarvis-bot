@@ -20,7 +20,6 @@ func main() {
 	defer db.Close()
 
 	jiraClient := jira.New(cfg)
-	jiraClient.GetProjects()
 
 	// Создаем клиента Mattermost и получаем информацию о пользователе
 	client := model.NewAPIv4Client(cfg.Url)

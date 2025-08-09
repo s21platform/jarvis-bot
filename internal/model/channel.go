@@ -12,4 +12,10 @@ const (
 	JARVIS_BOT_CHANNEL      = "jarvis-bot"
 	JARVIS_BOT_NEWS_CHANNEL = "jarvis-bot-news"
 	JARVIS_PUBLIC_CHANNEL   = "jarvis-public"
+
+	FRONTEND_CHANNEL       = "frontend"
+	FRONTEND_NEWS_CHANNEL  = "frontend-news"
+	FRONTEND_ULTRA_CHANNEL = "ultra-frontend"
+
+	TECH_STREAM_CHANNEL = "tech-stream"
 )

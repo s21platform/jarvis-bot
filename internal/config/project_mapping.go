@@ -31,6 +31,14 @@ func NewProjectMapping() *ProjectMapping {
 			model.JARVIS_BOT_CHANNEL:      model.JARVIS_PROJECT,
 			model.JARVIS_BOT_NEWS_CHANNEL: model.JARVIS_PROJECT,
 			model.JARVIS_PUBLIC_CHANNEL:   model.JARVIS_PROJECT,
+
+			// Frontend
+			model.FRONTEND_CHANNEL:       model.FRONTEND_PROJECT,
+			model.FRONTEND_NEWS_CHANNEL:  model.FRONTEND_PROJECT,
+			model.FRONTEND_ULTRA_CHANNEL: model.FRONTEND_PROJECT,
+
+			// Tech Stream
+			model.TECH_STREAM_CHANNEL: model.TECH_STREAM,
 		},
 	}
 }
