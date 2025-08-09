@@ -32,7 +32,7 @@ func main() {
 	}
 
 	// Создаем фабрику команд
-	cmdFactory := command.NewFactory(client, user, db)
+	cmdFactory := command.NewFactory(client, user, db, jiraClient)
 
 	// Создаем и запускаем бота
 	b := bot.New(cfg, cmdFactory)

@@ -36,3 +36,23 @@ func (j *Jira) GetProjects() {
 		log.Println(i.Key, i.Name)
 	}
 }
+
+func (j *Jira) CreateIssue(title string, issueType string, projectKey string) (string, error) {
+	issue := &jira.Issue{
+		Fields: &jira.IssueFields{
+			Summary: title,
+			Type: jira.IssueType{
+				Name: issueType,
+			},
+			Project: jira.Project{
+				Key: projectKey,
+			},
+		},
+	}
+
+	resp, _, err := j.Issue.Create(issue)
+	if err != nil {
+		return "", err
+	}
+	return resp.Key, nil
+}

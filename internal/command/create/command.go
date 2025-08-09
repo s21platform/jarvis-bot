@@ -12,6 +12,7 @@ import (
 type Command struct {
 	types.BaseCommand
 	db bot.DbRepo
+	jC JiraClient
 }
 
 // GetContext возвращает контекст команды
@@ -20,10 +21,11 @@ func (c *Command) GetContext() *types.CommandContext {
 }
 
 // NewCommand создает новую команду create
-func NewCommand(db bot.DbRepo) *Command {
+func NewCommand(db bot.DbRepo, jC JiraClient) *Command {
 	return &Command{
 		BaseCommand: types.NewBaseCommand("create", "Создать задачу или баг (task/bug)"),
 		db:          db,
+		jC:          jC,
 	}
 }
 
@@ -68,10 +70,12 @@ func (c *Command) handleTask(title string) (string, error) {
 		return fmt.Sprintf("Канал %s не привязан к проекту Jira", ctx.Channel.Name), nil
 	}
 
-	// TODO: Реализовать создание задачи в Jira
-	// Пример использования:
-	// return c.jiraClient.CreateIssue(ctx.ProjectKey, "Task", title)
-	return fmt.Sprintf("Создание задачи в проекте %s с заголовком: %s", ctx.ProjectKey, title), nil
+	key, err := c.jC.CreateIssue(title, "Task", ctx.ProjectKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to create jira task: %w", err)
+	}
+
+	return fmt.Sprintf("Создана задача %s", key), nil
 }
 
 // handleBug обрабатывает создание бага
@@ -85,8 +89,10 @@ func (c *Command) handleBug(title string) (string, error) {
 		return fmt.Sprintf("Канал %s не привязан к проекту Jira", ctx.Channel.Name), nil
 	}
 
-	// TODO: Реализовать создание бага в Jira
-	// Пример использования:
-	// return c.jiraClient.CreateIssue(ctx.ProjectKey, "Bug", title)
-	return fmt.Sprintf("Создание бага в проекте %s с заголовком: %s", ctx.ProjectKey, title), nil
+	key, err := c.jC.CreateIssue(title, "Bug", ctx.ProjectKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to create jira bug: %w", err)
+	}
+
+	return fmt.Sprintf("Создан баг %s", key), nil
 }

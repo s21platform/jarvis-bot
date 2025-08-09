@@ -16,7 +16,7 @@ type Factory struct {
 }
 
 // NewFactory создает новую фабрику команд
-func NewFactory(client *model.Client4, user *model.User, db bot.DbRepo) *Factory {
+func NewFactory(client *model.Client4, user *model.User, db bot.DbRepo, jC JiraClient) *Factory {
 	f := &Factory{
 		commands: make(map[string]types.Command),
 	}
@@ -24,7 +24,7 @@ func NewFactory(client *model.Client4, user *model.User, db bot.DbRepo) *Factory
 	// Создаем команды
 	credCmd := cred.NewCommand(db)
 	newsCmd := news.NewCommand(client, db, user.Id)
-	createCmd := create.NewCommand(db)
+	createCmd := create.NewCommand(db, jC)
 
 	// Добавляем команды в map
 	commands := []types.Command{

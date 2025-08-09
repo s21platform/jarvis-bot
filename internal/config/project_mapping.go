@@ -26,6 +26,11 @@ func NewProjectMapping() *ProjectMapping {
 			model.MATERIALS_SERVICE_CHANNEL:        model.MATERIALS_PROJECT,
 			model.MATERIALS_SERVICE_NEWS_CHANNEL:   model.MATERIALS_PROJECT,
 			model.MATERIALS_SERVICE_PUBLIC_CHANNEL: model.MATERIALS_PROJECT,
+
+			// Jarvis
+			model.JARVIS_BOT_CHANNEL:      model.JARVIS_PROJECT,
+			model.JARVIS_BOT_NEWS_CHANNEL: model.JARVIS_PROJECT,
+			model.JARVIS_PUBLIC_CHANNEL:   model.JARVIS_PROJECT,
 		},
 	}
 }
