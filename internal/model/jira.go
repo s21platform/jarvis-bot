@@ -1,0 +1,9 @@
+package model
+
+const (
+	COMMUNITY_PROJECT = "COM"
+	MATERIALS_PROJECT = "MTR"
+	JARVIS_PROJECT    = "JRV"
+	FRONTEND_PROJECT  = "FNT"
+	TECH_STREAM       = "TECH"
+)
