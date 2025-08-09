@@ -104,12 +104,46 @@ func NewFactory(client *model.Client4, user *model.User, db bot.DbRepo) *Factory
 - При удалении новости реакция автоматически убирается
 - Длинные новости (>80 символов) сокращаются с добавлением ссылки "читать далее"
 
+### create
+Создание задач и багов в Jira.
+```
+@jarvis create task <заголовок>  # Создать задачу 💡
+@jarvis create bug <заголовок>   # Создать баг 🐞
+```
+
+Особенности команды create:
+- Автоматически определяет проект Jira на основе канала
+- Возвращает кликабельную ссылку на созданную задачу/баг
+
+#### Настройка маппинга каналов в проекты Jira
+
+Для работы команды `create` необходимо настроить соответствие между каналами Mattermost и проектами Jira. Это делается в файле `internal/config/project_mapping.go`:
+
+```go
+func NewProjectMapping() *ProjectMapping {
+    return &ProjectMapping{
+        ChannelToProject: map[string]string{
+            // Примеры маппинга:
+            "chat-team-backend": "BACK",     // Канал -> Ключ проекта в Jira
+            "chat-team-frontend": "FRONT",
+            
+            // Community
+            model.COMMUNITY_SERVICE_CHANNEL:        model.COMMUNITY_PROJECT,
+            model.COMMUNITY_SERVICE_NEWS_CHANNEL:   model.COMMUNITY_PROJECT,
+            model.COMMUNITY_SERVICE_PUBLIC_CHANNEL: model.COMMUNITY_PROJECT,
+            
+            // Добавьте свои маппинги здесь
+        },
+    }
+}
+
 ## Разработка
 
 ### Требования
 - Go 1.21+
 - PostgreSQL 14+
 - Mattermost Server
+- Jira Server/Cloud
 
 ### Конфигурация
 Создайте файл `.env` на основе `.env.example`:
