@@ -20,8 +20,8 @@ type Bot struct {
 }
 
 func New(cfg *config.Config, cmdFactory CommandFactory) *Bot {
-	client := model.NewAPIv4Client(cfg.Url)
-	client.SetOAuthToken(cfg.Token)
+	client := model.NewAPIv4Client(cfg.Bot.Url)
+	client.SetOAuthToken(cfg.Bot.Token)
 
 	user, _, err := client.GetMe("")
 	if err != nil {
@@ -29,7 +29,7 @@ func New(cfg *config.Config, cmdFactory CommandFactory) *Bot {
 	}
 	//log.Printf("Успешно авторизован как %s", user.Username)
 
-	websocketClient, err := model.NewWebSocketClient4("wss://"+cfg.Url[len("https://"):], client.AuthToken)
+	websocketClient, err := model.NewWebSocketClient4("wss://"+cfg.Bot.Url[len("https://"):], client.AuthToken)
 	if err != nil {
 		log.Fatalf("Ошибка подключения к WebSocket: %v", err)
 	}

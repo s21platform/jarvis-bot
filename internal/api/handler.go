@@ -5,34 +5,38 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mattermost/mattermost-server/v6/model"
-	"github.com/s21platform/jarvis-bot/internal/config"
-	api "github.com/s21platform/jarvis-bot/internal/generated"
-	internal_model "github.com/s21platform/jarvis-bot/internal/model"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/mattermost/mattermost-server/v6/model"
+
+	"github.com/s21platform/jarvis-bot/internal/config"
+	api "github.com/s21platform/jarvis-bot/internal/generated"
+	internal_model "github.com/s21platform/jarvis-bot/internal/model"
 )
 
 type Handler struct {
-	bot    *model.User
-	client *model.Client4
-	dbR    DatabaseRepo
+	bot         *model.User
+	client      *model.Client4
+	dbR         DatabaseRepo
+	callbackUrl string
 }
 
-func New(cfg *config.Config, dbR DatabaseRepo) *Handler {
-	client := model.NewAPIv4Client(cfg.Url)
-	client.SetOAuthToken(cfg.Token)
+func New(cfg *config.Config, dbR DatabaseRepo, callbackUrl string) *Handler {
+	client := model.NewAPIv4Client(cfg.Bot.Url)
+	client.SetOAuthToken(cfg.Bot.Token)
 
 	bot, _, err := client.GetMe("")
 	if err != nil {
 		log.Fatalf("Не удалось получить информацию о пользователе: %v", err)
 	}
 	return &Handler{
-		bot:    bot,
-		client: client,
-		dbR:    dbR,
+		bot:         bot,
+		client:      client,
+		dbR:         dbR,
+		callbackUrl: callbackUrl,
 	}
 }
 
@@ -85,7 +89,6 @@ func (h *Handler) PostSaveBirthday(w http.ResponseWriter, r *http.Request) {
 		} else {
 			yearPtr = &yearInt
 		}
-
 	}
 
 	var channelId string
@@ -153,7 +156,7 @@ func (h *Handler) PostShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Re
 
 	_, err = h.client.OpenInteractiveDialog(model.OpenDialogRequest{
 		TriggerId: in.TriggerId,
-		URL:       "https://12c3672ee943.ngrok-free.app/save-birthday",
+		URL:       h.callbackUrl + "/save-birthday",
 		Dialog: model.Dialog{
 			Title: "Твой день рождения",
 			Elements: []model.DialogElement{
@@ -214,7 +217,7 @@ func generateMonths() []*model.PostActionOptions {
 		"Декабрь",
 	} {
 		res = append(res, &model.PostActionOptions{
-			Text:  fmt.Sprintf("%s", m),
+			Text:  m,
 			Value: fmt.Sprintf("%d", i+1),
 		})
 	}

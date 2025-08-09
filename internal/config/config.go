@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	Bot
-	Postgres
-	Service
-	Jira
+	Bot      Bot
+	Postgres Postgres
+	Service  Service
+	Jira     Jira
+	Redis    Redis
 }
 
 type Bot struct {
@@ -35,6 +36,12 @@ type Jira struct {
 
 type Service struct {
 	Port string `env:"JARVIS_BOT_SERVICE_PORT"`
+	Url  string `env:"JARVIS_URL_CALLBACK"`
+}
+
+type Redis struct {
+	Host string `env:"JARVIS_BOT_REDIS_HOST"`
+	Port string `env:"JARVIS_BOT_REDIS_PORT"`
 }
 
 func MustLoadConfig() *Config {

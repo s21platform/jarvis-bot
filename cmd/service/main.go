@@ -2,20 +2,23 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
+
 	"github.com/s21platform/jarvis-bot/internal/api"
 	"github.com/s21platform/jarvis-bot/internal/config"
 	api2 "github.com/s21platform/jarvis-bot/internal/generated"
 	"github.com/s21platform/jarvis-bot/internal/repository/postgres"
-	"log"
-	"net/http"
 )
 
 func main() {
 	cfg := config.MustLoadConfig()
+	log.Println(cfg.Service.Url)
 
 	repo := postgres.New(cfg)
-	h := api.New(cfg, repo)
+	h := api.New(cfg, repo, cfg.Service.Url)
 
 	r := chi.NewRouter()
 
