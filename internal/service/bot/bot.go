@@ -12,10 +12,11 @@ import (
 )
 
 type Bot struct {
-	websocket  *model.WebSocketClient
-	client     *model.Client4
-	user       *model.User
-	cmdFactory CommandFactory
+	websocket      *model.WebSocketClient
+	client         *model.Client4
+	user           *model.User
+	cmdFactory     CommandFactory
+	projectMapping *config.ProjectMapping
 }
 
 func New(cfg *config.Config, cmdFactory CommandFactory) *Bot {
@@ -34,10 +35,11 @@ func New(cfg *config.Config, cmdFactory CommandFactory) *Bot {
 	}
 
 	bot := &Bot{
-		websocket:  websocketClient,
-		client:     client,
-		user:       user,
-		cmdFactory: cmdFactory,
+		websocket:      websocketClient,
+		client:         client,
+		user:           user,
+		cmdFactory:     cmdFactory,
+		projectMapping: config.NewProjectMapping(),
 	}
 
 	return bot
@@ -80,9 +82,10 @@ func (b *Bot) Listen() {
 						} else {
 							// Устанавливаем контекст команды
 							cmdCtx := &types.CommandContext{
-								Post:    post,
-								Channel: channel,
-								User:    user,
+								Post:       post,
+								Channel:    channel,
+								User:       user,
+								ProjectKey: b.projectMapping.GetProjectKey(channel.Name),
 							}
 							command.SetContext(cmdCtx)
 

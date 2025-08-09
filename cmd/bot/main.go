@@ -4,8 +4,10 @@ import (
 	"log"
 
 	"github.com/mattermost/mattermost-server/v6/model"
+
 	"github.com/s21platform/jarvis-bot/internal/command"
 	"github.com/s21platform/jarvis-bot/internal/config"
+	"github.com/s21platform/jarvis-bot/internal/jira"
 	"github.com/s21platform/jarvis-bot/internal/repository/postgres"
 	"github.com/s21platform/jarvis-bot/internal/service/bot"
 )
@@ -17,6 +19,8 @@ func main() {
 	db := postgres.New(cfg)
 	defer db.Close()
 
+	jiraClient := jira.New(cfg)
+
 	// Создаем клиента Mattermost и получаем информацию о пользователе
 	client := model.NewAPIv4Client(cfg.Url)
 	client.SetOAuthToken(cfg.Token)
@@ -27,7 +31,7 @@ func main() {
 	}
 
 	// Создаем фабрику команд
-	cmdFactory := command.NewFactory(client, user, db)
+	cmdFactory := command.NewFactory(client, user, db, jiraClient)
 
 	// Создаем и запускаем бота
 	b := bot.New(cfg, cmdFactory)

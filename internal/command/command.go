@@ -25,9 +25,10 @@ type BaseCommand struct {
 
 // CommandContext содержит контекст выполнения команды
 type CommandContext struct {
-	Post    *model.Post
-	Channel *model.Channel
-	User    *model.User
+	Post       *model.Post
+	Channel    *model.Channel
+	User       *model.User
+	ProjectKey string // Ключ проекта Jira для текущего канала
 }
 
 // Name возвращает имя команды
