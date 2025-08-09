@@ -22,8 +22,8 @@ func main() {
 	jiraClient := jira.New(cfg)
 
 	// Создаем клиента Mattermost и получаем информацию о пользователе
-	client := model.NewAPIv4Client(cfg.Url)
-	client.SetOAuthToken(cfg.Token)
+	client := model.NewAPIv4Client(cfg.Bot.Url)
+	client.SetOAuthToken(cfg.Bot.Token)
 
 	user, _, err := client.GetMe("")
 	if err != nil {
