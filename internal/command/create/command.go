@@ -14,6 +14,11 @@ type Command struct {
 	db bot.DbRepo
 }
 
+// GetContext возвращает контекст команды
+func (c *Command) GetContext() *types.CommandContext {
+	return c.BaseCommand.GetContext()
+}
+
 // NewCommand создает новую команду create
 func NewCommand(db bot.DbRepo) *Command {
 	return &Command{
@@ -54,12 +59,34 @@ func (c *Command) Execute(args string) (string, error) {
 
 // handleTask обрабатывает создание задачи
 func (c *Command) handleTask(title string) (string, error) {
-	// TODO: Реализовать создание задачи
-	return fmt.Sprintf("Создание задачи с заголовком: %s", title), nil
+	ctx := c.GetContext()
+	if ctx == nil || ctx.Channel == nil {
+		return "", fmt.Errorf("не удалось получить контекст команды")
+	}
+
+	if ctx.ProjectKey == "" {
+		return fmt.Sprintf("Канал %s не привязан к проекту Jira", ctx.Channel.Name), nil
+	}
+
+	// TODO: Реализовать создание задачи в Jira
+	// Пример использования:
+	// return c.jiraClient.CreateIssue(ctx.ProjectKey, "Task", title)
+	return fmt.Sprintf("Создание задачи в проекте %s с заголовком: %s", ctx.ProjectKey, title), nil
 }
 
 // handleBug обрабатывает создание бага
 func (c *Command) handleBug(title string) (string, error) {
-	// TODO: Реализовать создание бага
-	return fmt.Sprintf("Создание бага с заголовком: %s", title), nil
+	ctx := c.GetContext()
+	if ctx == nil || ctx.Channel == nil {
+		return "", fmt.Errorf("не удалось получить контекст команды")
+	}
+
+	if ctx.ProjectKey == "" {
+		return fmt.Sprintf("Канал %s не привязан к проекту Jira", ctx.Channel.Name), nil
+	}
+
+	// TODO: Реализовать создание бага в Jira
+	// Пример использования:
+	// return c.jiraClient.CreateIssue(ctx.ProjectKey, "Bug", title)
+	return fmt.Sprintf("Создание бага в проекте %s с заголовком: %s", ctx.ProjectKey, title), nil
 }
