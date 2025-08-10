@@ -12,6 +12,8 @@ type Config struct {
 	Service  Service
 	Jira     Jira
 	Redis    Redis
+	Metrics  Metrics
+	Platform Platform
 }
 
 type Bot struct {
@@ -42,6 +44,15 @@ type Service struct {
 type Redis struct {
 	Host string `env:"JARVIS_BOT_REDIS_HOST"`
 	Port string `env:"JARVIS_BOT_REDIS_PORT"`
+}
+
+type Metrics struct {
+	Host string `env:"GRAFANA_HOST"`
+	Port int    `env:"GRAFANA_PORT"`
+}
+
+type Platform struct {
+	Env string `env:"ENV"`
 }
 
 func MustLoadConfig() *Config {
