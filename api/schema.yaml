@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 
 paths:
-  /show-birthday-dialog-window:
+  /service/show-birthday-dialog-window:
     post:
       summary: Handle Open Dialog window for birthday poll
       requestBody:
@@ -17,7 +17,7 @@ paths:
         '200':
           description: OK
 
-  /save-birthday:
+  /service/save-birthday:
     post:
       summary: Handle Saving birthday
       requestBody:

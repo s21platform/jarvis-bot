@@ -27,8 +27,8 @@ type OpenBirthdayWindow struct {
 	UserId    string                  `json:"user_id"`
 }
 
-// PostSaveBirthdayJSONRequestBody defines body for PostSaveBirthday for application/json ContentType.
-type PostSaveBirthdayJSONRequestBody = HandleSavingBirthday
+// PostServiceSaveBirthdayJSONRequestBody defines body for PostServiceSaveBirthday for application/json ContentType.
+type PostServiceSaveBirthdayJSONRequestBody = HandleSavingBirthday
 
-// PostShowBirthdayDialogWindowJSONRequestBody defines body for PostShowBirthdayDialogWindow for application/json ContentType.
-type PostShowBirthdayDialogWindowJSONRequestBody = OpenBirthdayWindow
+// PostServiceShowBirthdayDialogWindowJSONRequestBody defines body for PostServiceShowBirthdayDialogWindow for application/json ContentType.
+type PostServiceShowBirthdayDialogWindowJSONRequestBody = OpenBirthdayWindow
