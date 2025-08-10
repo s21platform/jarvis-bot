@@ -27,5 +27,7 @@ func main() {
 
 	worker := worker.NewWorker(redis, dbRepo, client, cfg, metrics)
 
+	log.Println("Starting worker")
 	worker.Run()
+	log.Println("worker shutting down")
 }
