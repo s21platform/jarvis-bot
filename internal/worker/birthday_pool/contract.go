@@ -25,3 +25,11 @@ type DbRepo interface {
 	SetBirthday(ctx context.Context, birthday *modelInternal.Birthday, userId string, channelId string, nickname string) error
 	GetConfig(ctx context.Context, key string) (modelInternal.Config, error)
 }
+
+type Metrics interface {
+	Count(name string, value int64)
+	Disconnect()
+	Duration(timestamp int64, name string)
+	Gauge(name string, value float64)
+	Increment(name string)
+}
