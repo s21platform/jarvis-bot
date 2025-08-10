@@ -40,7 +40,7 @@ func New(cfg *config.Config, dbR DatabaseRepo, callbackUrl string) *Handler {
 	}
 }
 
-func (h *Handler) PostSaveBirthday(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) PostServiceSaveBirthday(w http.ResponseWriter, r *http.Request) {
 	var in api.HandleSavingBirthday
 	err := json.NewDecoder(r.Body).Decode(&in)
 	if err != nil {
@@ -131,7 +131,7 @@ func (h *Handler) sendCallbackMessage(userId string, message string) {
 	}
 }
 
-func (h *Handler) PostShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) PostServiceShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Request) {
 	log.Println("PostShowBirthdayDialogWindow")
 	var in api.OpenBirthdayWindow
 	err := json.NewDecoder(r.Body).Decode(&in)
@@ -156,7 +156,7 @@ func (h *Handler) PostShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Re
 
 	_, err = h.client.OpenInteractiveDialog(model.OpenDialogRequest{
 		TriggerId: in.TriggerId,
-		URL:       h.callbackUrl + "/save-birthday",
+		URL:       h.callbackUrl + "/service/save-birthday",
 		Dialog: model.Dialog{
 			Title: "Твой день рождения",
 			Elements: []model.DialogElement{

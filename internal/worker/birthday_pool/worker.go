@@ -163,7 +163,7 @@ func (w *Worker) run() {
 							{
 								"name": "Открыть форму",
 								"integration": map[string]interface{}{
-									"url": w.callbackUrl + "/show-birthday-dialog-window",
+									"url": w.callbackUrl + "/service/show-birthday-dialog-window",
 									"context": map[string]interface{}{
 										"action": "open_modal_birthday",
 									},

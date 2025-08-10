@@ -13,11 +13,11 @@ import (
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Handle Saving birthday
-	// (POST /save-birthday)
-	PostSaveBirthday(w http.ResponseWriter, r *http.Request)
+	// (POST /service/save-birthday)
+	PostServiceSaveBirthday(w http.ResponseWriter, r *http.Request)
 	// Handle Open Dialog window for birthday poll
-	// (POST /show-birthday-dialog-window)
-	PostShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Request)
+	// (POST /service/show-birthday-dialog-window)
+	PostServiceShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -25,14 +25,14 @@ type ServerInterface interface {
 type Unimplemented struct{}
 
 // Handle Saving birthday
-// (POST /save-birthday)
-func (_ Unimplemented) PostSaveBirthday(w http.ResponseWriter, r *http.Request) {
+// (POST /service/save-birthday)
+func (_ Unimplemented) PostServiceSaveBirthday(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Handle Open Dialog window for birthday poll
-// (POST /show-birthday-dialog-window)
-func (_ Unimplemented) PostShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Request) {
+// (POST /service/show-birthday-dialog-window)
+func (_ Unimplemented) PostServiceShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -45,11 +45,11 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// PostSaveBirthday operation middleware
-func (siw *ServerInterfaceWrapper) PostSaveBirthday(w http.ResponseWriter, r *http.Request) {
+// PostServiceSaveBirthday operation middleware
+func (siw *ServerInterfaceWrapper) PostServiceSaveBirthday(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostSaveBirthday(w, r)
+		siw.Handler.PostServiceSaveBirthday(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -59,11 +59,11 @@ func (siw *ServerInterfaceWrapper) PostSaveBirthday(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
-// PostShowBirthdayDialogWindow operation middleware
-func (siw *ServerInterfaceWrapper) PostShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Request) {
+// PostServiceShowBirthdayDialogWindow operation middleware
+func (siw *ServerInterfaceWrapper) PostServiceShowBirthdayDialogWindow(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostShowBirthdayDialogWindow(w, r)
+		siw.Handler.PostServiceShowBirthdayDialogWindow(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -187,10 +187,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/save-birthday", wrapper.PostSaveBirthday)
+		r.Post(options.BaseURL+"/service/save-birthday", wrapper.PostServiceSaveBirthday)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/show-birthday-dialog-window", wrapper.PostShowBirthdayDialogWindow)
+		r.Post(options.BaseURL+"/service/show-birthday-dialog-window", wrapper.PostServiceShowBirthdayDialogWindow)
 	})
 
 	return r
