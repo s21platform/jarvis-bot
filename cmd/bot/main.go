@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/mattermost/mattermost-server/v6/model"
 
@@ -13,6 +16,10 @@ import (
 )
 
 func main() {
+	// Канал для обработки сигналов завершения
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
 	cfg := config.MustLoadConfig()
 
 	// Инициализируем подключение к базе данных
@@ -36,6 +43,11 @@ func main() {
 	// Создаем и запускаем бота
 	b := bot.New(cfg, cmdFactory)
 	defer b.Close()
+
+	// Запускаем бота
 	b.Listen()
-	select {}
+
+	// Ожидаем сигнала завершения
+	<-sigChan
+	log.Println("Получен сигнал завершения, graceful shutdown...")
 }
