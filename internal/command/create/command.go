@@ -5,13 +5,12 @@ import (
 	"strings"
 
 	"github.com/s21platform/jarvis-bot/internal/pkg/types"
-	"github.com/s21platform/jarvis-bot/internal/service/bot"
 )
 
 // Command реализует команду create
 type Command struct {
 	types.BaseCommand
-	db bot.DbRepo
+	db DbRepo
 	jC JiraClient
 }
 
@@ -21,7 +20,7 @@ func (c *Command) GetContext() *types.CommandContext {
 }
 
 // NewCommand создает новую команду create
-func NewCommand(db bot.DbRepo, jC JiraClient) *Command {
+func NewCommand(db DbRepo, jC JiraClient) *Command {
 	return &Command{
 		BaseCommand: types.NewBaseCommand("create", "Создать задачу или баг (task/bug)"),
 		db:          db,

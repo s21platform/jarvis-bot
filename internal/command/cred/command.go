@@ -8,17 +8,16 @@ import (
 
 	"github.com/s21platform/jarvis-bot/internal/pkg/types"
 	"github.com/s21platform/jarvis-bot/internal/pkg/utils"
-	"github.com/s21platform/jarvis-bot/internal/service/bot"
 )
 
 // Command реализует команду cred
 type Command struct {
 	types.BaseCommand
-	db bot.DbRepo
+	db DbRepo
 }
 
 // NewCommand создает новую команду cred
-func NewCommand(db bot.DbRepo) *Command {
+func NewCommand(db DbRepo) *Command {
 	return &Command{
 		BaseCommand: types.NewBaseCommand("cred", "Показать учетные данные для сервиса"),
 		db:          db,

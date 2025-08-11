@@ -13,6 +13,7 @@ import (
 	"github.com/s21platform/jarvis-bot/internal/jira"
 	"github.com/s21platform/jarvis-bot/internal/repository/postgres"
 	"github.com/s21platform/jarvis-bot/internal/service/bot"
+"github.com/s21platform/metrics-lib/pkg"
 )
 
 func main() {
@@ -21,6 +22,11 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	cfg := config.MustLoadConfig()
+
+	metrics, err := pkg.NewMetrics(cfg.Metrics.Host, cfg.Metrics.Port, "jarvis-bot", cfg.Platform.Env)
+	if err != nil {
+		log.Fatalf("Failed to create metrics: %v", err)
+	}
 
 	// Инициализируем подключение к базе данных
 	db := postgres.New(cfg)
@@ -41,7 +47,7 @@ func main() {
 	cmdFactory := command.NewFactory(client, user, db, jiraClient)
 
 	// Создаем и запускаем бота
-	b := bot.New(cfg, cmdFactory)
+	b := bot.New(cfg, cmdFactory, metrics)
 	defer b.Close()
 
 	// Запускаем бота
