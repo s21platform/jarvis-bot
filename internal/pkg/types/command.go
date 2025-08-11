@@ -13,7 +13,7 @@ type Command interface {
 	// Description возвращает описание команды
 	Description() string
 	// SetContext устанавливает контекст выполнения команды
-	SetContext(ctx *CommandContext)
+	SetContext(ctx interface{})
 }
 
 // BaseCommand содержит общие поля для всех команд
@@ -50,8 +50,10 @@ func (c *BaseCommand) Description() string {
 }
 
 // SetContext устанавливает контекст выполнения команды
-func (c *BaseCommand) SetContext(ctx *CommandContext) {
-	c.context = ctx
+func (c *BaseCommand) SetContext(ctx interface{}) {
+	if cmdCtx, ok := ctx.(*CommandContext); ok {
+		c.context = cmdCtx
+	}
 }
 
 // GetContext возвращает контекст выполнения команды

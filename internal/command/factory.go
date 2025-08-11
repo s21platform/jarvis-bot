@@ -16,7 +16,7 @@ type Factory struct {
 }
 
 // NewFactory создает новую фабрику команд
-func NewFactory(client *model.Client4, user *model.User, db bot.DbRepo, jC JiraClient) *Factory {
+func NewFactory(client *model.Client4, user *model.User, db DbRepo, jC JiraClient) *Factory {
 	f := &Factory{
 		commands: make(map[string]types.Command),
 	}
@@ -46,7 +46,7 @@ func NewFactory(client *model.Client4, user *model.User, db bot.DbRepo, jC JiraC
 }
 
 // GetCommand возвращает команду по имени
-func (f *Factory) GetCommand(name string) types.Command {
+func (f *Factory) GetCommand(name string) bot.Command {
 	return f.commands[name]
 }
 

@@ -11,14 +11,13 @@ import (
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/s21platform/jarvis-bot/internal/pkg/types"
 	"github.com/s21platform/jarvis-bot/internal/pkg/utils"
-	"github.com/s21platform/jarvis-bot/internal/service/bot"
 )
 
 // Command реализует команду news
 type Command struct {
 	types.BaseCommand
 	client *model.Client4
-	db     bot.DbRepo
+	db     DbRepo
 	botID  string // ID бота для реакций
 }
 
@@ -27,7 +26,7 @@ const (
 )
 
 // NewCommand создает новую команду news
-func NewCommand(client *model.Client4, db bot.DbRepo, botID string) *Command {
+func NewCommand(client *model.Client4, db DbRepo, botID string) *Command {
 	return &Command{
 		BaseCommand: types.NewBaseCommand("news", "Управление новостями (add/delete/show)"),
 		client:      client,
