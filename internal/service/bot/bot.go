@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/s21platform/jarvis-bot/internal/config"
@@ -17,9 +18,10 @@ type Bot struct {
 	user           *model.User
 	cmdFactory     CommandFactory
 	projectMapping *config.ProjectMapping
+	metrics        Metrics
 }
 
-func New(cfg *config.Config, cmdFactory CommandFactory) *Bot {
+func New(cfg *config.Config, cmdFactory CommandFactory, metrics Metrics) *Bot {
 	client := model.NewAPIv4Client(cfg.Bot.Url)
 	client.SetOAuthToken(cfg.Bot.Token)
 
@@ -29,17 +31,12 @@ func New(cfg *config.Config, cmdFactory CommandFactory) *Bot {
 	}
 	//log.Printf("Успешно авторизован как %s", user.Username)
 
-	websocketClient, err := model.NewWebSocketClient4("wss://"+cfg.Bot.Url[len("https://"):], client.AuthToken)
-	if err != nil {
-		log.Fatalf("Ошибка подключения к WebSocket: %v", err)
-	}
-
 	bot := &Bot{
-		websocket:      websocketClient,
 		client:         client,
 		user:           user,
 		cmdFactory:     cmdFactory,
 		projectMapping: config.NewProjectMapping(),
+		metrics:        metrics,
 	}
 
 	return bot
@@ -47,74 +44,100 @@ func New(cfg *config.Config, cmdFactory CommandFactory) *Bot {
 
 func (b *Bot) Listen() {
 	go func() {
-		//time.Sleep(2 * time.Second)
-		for event := range b.websocket.EventChannel {
-			if event.EventType() == model.WebsocketEventPosted {
-				post, err := parser.GetPost(event)
-				if err != nil {
-					log.Printf("Failed to get post: %v", err)
-					continue
+		for {
+			if err := b.connect(); err != nil {
+				log.Printf("Ошибка подключения к WebSocket: %v", err)
+				time.Sleep(5 * time.Second)
+				continue
+			}
+
+			for event := range b.websocket.EventChannel {
+				if event == nil {
+					log.Println("Получено пустое событие, переподключение...")
+					b.metrics.Increment("bot.websocket.events.empty")
+					time.Sleep(5 * time.Second)
+					break
 				}
 
-				// Обработка сценария упоминания бота
-				if strings.Contains(post.Message, "@"+b.user.Username) {
-					rootId := post.Id
-					if post.RootId != "" {
-						rootId = post.RootId
-					}
-					user, _, _ := b.client.GetUser(post.UserId, "")
-					channel, _, err := b.client.GetChannel(post.ChannelId, "")
+				b.metrics.Increment("bot.websocket.events.total")
+
+				if event.EventType() == model.WebsocketEventPosted {
+					b.metrics.Increment("bot.websocket.events.posted")
+					post, err := parser.GetPost(event)
 					if err != nil {
-						log.Printf("Failed to get channel: %v", err)
+						log.Printf("Failed to get post: %v", err)
+						b.metrics.Increment("bot.errors.parse_post")
 						continue
 					}
-					log.Println("[ CHANNEL ID ]", channel.Name)
 
-					cmd := parser.ParseCommand(post.Message)
-					var message string
+					// Обработка сценария упоминания бота
+					if strings.Contains(post.Message, "@"+b.user.Username) {
+						b.metrics.Increment("bot.messages.mentions")
+						rootId := post.Id
+						if post.RootId != "" {
+							rootId = post.RootId
+						}
+						user, _, _ := b.client.GetUser(post.UserId, "")
+						channel, _, err := b.client.GetChannel(post.ChannelId, "")
+						if err != nil {
+							log.Printf("Failed to get channel: %v", err)
+							b.metrics.Increment("bot.errors.get_channel")
+							continue
+						}
+						log.Println("[ CHANNEL ID ]", channel.Name)
 
-					if cmd.Name == "" {
-						message = fmt.Sprintf("Привет, %s! Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm. А весь доступный функционал ты можешь узнать по команде **help**", user.Username)
-					} else {
-						command := b.cmdFactory.GetCommand(cmd.Name)
-						if command == nil {
-							message = "Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm"
+						startTime := time.Now().UnixNano()
+						b.metrics.Increment("bot.commands.total")
+
+						cmd := parser.ParseCommand(post.Message)
+						var message string
+
+						if cmd.Name == "" {
+							b.metrics.Increment("bot.commands.unknown")
+							message = fmt.Sprintf("Привет, %s! Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm. А весь доступный функционал ты можешь узнать по команде **help**", user.Username)
 						} else {
-							// Устанавливаем контекст команды
-							cmdCtx := &types.CommandContext{
-								Post:       post,
-								Channel:    channel,
-								User:       user,
-								ProjectKey: b.projectMapping.GetProjectKey(channel.Name),
-							}
-							command.SetContext(cmdCtx)
+							command := b.cmdFactory.GetCommand(cmd.Name)
+							if command == nil {
+								b.metrics.Increment("bot.commands.unknown")
+								message = "Такая команда мне еще не знакома. Если ты считаешь, что такая команда нужна, пиши @garroshm"
+							} else {
+								b.metrics.Increment("bot.commands." + cmd.Name)
+								// Устанавливаем контекст команды
+								cmdCtx := &types.CommandContext{
+									Post:       post,
+									Channel:    channel,
+									User:       user,
+									ProjectKey: b.projectMapping.GetProjectKey(channel.Name),
+								}
+								command.SetContext(cmdCtx)
 
-							var err error
-							message, err = command.Execute(cmd.Cmd)
-							if err != nil {
-								log.Printf("Failed to execute command: %v", err)
-								message = fmt.Sprintf("Произошла ошибка при выполнении команды: %v", err)
+								var err error
+								message, err = command.Execute(cmd.Cmd)
+								if err != nil {
+									log.Printf("Failed to execute command: %v", err)
+									b.metrics.Increment("bot.commands." + cmd.Name + ".errors")
+									message = fmt.Sprintf("Произошла ошибка при выполнении команды: %v", err)
+								}
+								b.metrics.Duration(startTime, "bot.commands."+cmd.Name+".duration")
 							}
 						}
-					}
 
-					sPost := &model.Post{
-						Message:   message,
-						RootId:    rootId,
-						ChannelId: post.ChannelId,
-					}
+						sPost := &model.Post{
+							Message:   message,
+							RootId:    rootId,
+							ChannelId: post.ChannelId,
+						}
 
-					err = b.SendMessage(sPost)
-					if err != nil {
-						log.Printf("Failed to send message: %v", err)
+						err = b.SendMessage(sPost)
+						if err != nil {
+							log.Printf("Failed to send message: %v", err)
+							b.metrics.Increment("bot.errors.send_message")
+						}
 					}
 				}
 			}
 		}
-		fmt.Println("kill go")
 	}()
-
-	b.websocket.Listen()
 }
 
 func (b *Bot) SendMessage(post *model.Post) error {
@@ -125,6 +148,31 @@ func (b *Bot) SendMessage(post *model.Post) error {
 	return nil
 }
 
+func (b *Bot) connect() error {
+	startTime := time.Now().UnixNano()
+	b.metrics.Increment("bot.websocket.connect.total")
+
+	if b.websocket != nil {
+		b.websocket.Close()
+	}
+
+	websocketURL := "wss://" + strings.TrimPrefix(b.client.URL, "https://")
+	websocketClient, err := model.NewWebSocketClient4(websocketURL, b.client.AuthToken)
+	if err != nil {
+		b.metrics.Increment("bot.websocket.connect.errors")
+		return fmt.Errorf("ошибка создания WebSocket клиента: %v", err)
+	}
+
+	b.websocket = websocketClient
+	b.websocket.Listen()
+
+	b.metrics.Duration(startTime, "bot.websocket.connect.duration")
+	b.metrics.Increment("bot.websocket.connect.success")
+	return nil
+}
+
 func (b *Bot) Close() {
-	b.websocket.Close()
+	if b.websocket != nil {
+		b.websocket.Close()
+	}
 }
