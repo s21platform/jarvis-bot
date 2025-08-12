@@ -6,4 +6,5 @@ const (
 	JARVIS_PROJECT    = "JRV"
 	FRONTEND_PROJECT  = "FNT"
 	TECH_STREAM       = "TECH"
+	EVO_PROJECT       = "EVO"
 )

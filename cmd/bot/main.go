@@ -8,12 +8,13 @@ import (
 
 	"github.com/mattermost/mattermost-server/v6/model"
 
+	"github.com/s21platform/metrics-lib/pkg"
+
 	"github.com/s21platform/jarvis-bot/internal/command"
 	"github.com/s21platform/jarvis-bot/internal/config"
 	"github.com/s21platform/jarvis-bot/internal/jira"
 	"github.com/s21platform/jarvis-bot/internal/repository/postgres"
 	"github.com/s21platform/jarvis-bot/internal/service/bot"
-"github.com/s21platform/metrics-lib/pkg"
 )
 
 func main() {

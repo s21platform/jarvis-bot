@@ -18,4 +18,6 @@ const (
 	FRONTEND_ULTRA_CHANNEL = "ultra-frontend"
 
 	TECH_STREAM_CHANNEL = "tech-stream"
+
+	EVO_CHANNEL = "evo"
 )
