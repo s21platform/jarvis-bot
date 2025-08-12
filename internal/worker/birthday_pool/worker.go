@@ -31,7 +31,7 @@ func NewWorker(rC RedisClient, db DbRepo, mC MattermostClient, cfg *config.Confi
 }
 
 func (w *Worker) Run() {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(1 * time.Hour)
 	defer ticker.Stop()
 
 	for range ticker.C {

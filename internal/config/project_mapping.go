@@ -39,6 +39,9 @@ func NewProjectMapping() *ProjectMapping {
 
 			// Tech Stream
 			model.TECH_STREAM_CHANNEL: model.TECH_STREAM,
+
+			// Evo
+			model.EVO_CHANNEL: model.EVO_PROJECT,
 		},
 	}
 }
