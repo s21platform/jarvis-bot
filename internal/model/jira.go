@@ -7,4 +7,5 @@ const (
 	FRONTEND_PROJECT  = "FNT"
 	TECH_STREAM       = "TECH"
 	EVO_PROJECT       = "EVO"
+	USER_PROJECT      = "USR"
 )

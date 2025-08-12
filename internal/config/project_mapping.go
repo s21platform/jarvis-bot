@@ -42,6 +42,11 @@ func NewProjectMapping() *ProjectMapping {
 
 			// Evo
 			model.EVO_CHANNEL: model.EVO_PROJECT,
+
+			// User
+			model.USER_SERVICE_CHANNEL:        model.USER_PROJECT,
+			model.USER_SERVICE_NEWS_CHANNEL:   model.USER_PROJECT,
+			model.USER_SERVICE_PUBLIC_CHANNEL: model.USER_PROJECT,
 		},
 	}
 }

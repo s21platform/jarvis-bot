@@ -20,4 +20,8 @@ const (
 	TECH_STREAM_CHANNEL = "tech-stream"
 
 	EVO_CHANNEL = "evo"
+
+	USER_SERVICE_CHANNEL        = "user-service"
+	USER_SERVICE_NEWS_CHANNEL   = "user-service-news"
+	USER_SERVICE_PUBLIC_CHANNEL = "user-service-public"
 )
