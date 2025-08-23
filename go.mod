@@ -52,6 +52,7 @@ require (
 	github.com/redis/go-redis/v9 v9.11.0 // indirect
 	github.com/rs/xid v1.4.0 // indirect
 	github.com/s21platform/metrics-lib v0.0.9 // indirect
+	github.com/samber/lo v1.51.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	github.com/trivago/tgo v1.0.7 // indirect
@@ -62,7 +63,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29 // indirect
 	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b // indirect
 	golang.org/x/sys v0.0.0-20220403205710-6acee93ad0eb // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

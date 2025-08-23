@@ -52,4 +52,6 @@ const (
 	OPTIONHUB_SERVICE_CHANNEL        = "optionhub-service"
 	OPTIONHUB_SERVICE_NEWS_CHANNEL   = "optionhub-service-news"
 	OPTIONHUB_SERVICE_PUBLIC_CHANNEL = "optionhub-service-public"
+
+	LOGGER_LIB_CHANNEL = "logger-lib"
 )

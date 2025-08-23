@@ -40,7 +40,7 @@ func (j *Jira) GetProjects() {
 }
 
 // CreateIssue создает новую задачу в Jira
-func (j *Jira) CreateIssue(title string, issueType string, projectKey string) (string, error) {
+func (j *Jira) CreateIssue(title string, issueType string, projectKey string, labels []string) (string, error) {
 	i := jira.Issue{
 		Fields: &jira.IssueFields{
 			Project: jira.Project{
@@ -50,6 +50,7 @@ func (j *Jira) CreateIssue(title string, issueType string, projectKey string) (s
 			Type: jira.IssueType{
 				Name: issueType,
 			},
+			Labels: labels,
 		},
 	}
 

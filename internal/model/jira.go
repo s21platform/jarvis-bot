@@ -1,5 +1,7 @@
 package model
 
+import "github.com/samber/lo"
+
 const (
 	COMMUNITY_PROJECT = "COM"
 	MATERIALS_PROJECT = "MTR"
@@ -15,4 +17,8 @@ const (
 	SEARCH_PROJECT    = "SRC"
 	SOCIETY_PROJECT   = "STY"
 	OPTIONHUB_PROJECT = "OPT"
+)
+
+var (
+	LOGGER_LABEL = lo.ToPtr("logger")
 )

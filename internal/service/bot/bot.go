@@ -108,6 +108,7 @@ func (b *Bot) Listen() {
 									Channel:    channel,
 									User:       user,
 									ProjectKey: b.projectMapping.GetProjectKey(channel.Name),
+									Label:      b.projectMapping.GetLabel(channel.Name),
 								}
 								command.SetContext(cmdCtx)
 
