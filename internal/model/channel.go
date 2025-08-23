@@ -54,4 +54,12 @@ const (
 	OPTIONHUB_SERVICE_PUBLIC_CHANNEL = "optionhub-service-public"
 
 	LOGGER_LIB_CHANNEL = "logger-lib"
+
+	METRICS_LIB_CHANNEL = "metrics-lib"
+
+	KAFKA_LIB_CHANNEL = "kafka-lib"
+
+	GATEWAY_SERVICE_CHANNEL        = "gateway-service"
+	GATEWAY_SERVICE_NEWS_CHANNEL   = "gateway-service-news"
+	GATEWAY_SERVICE_PUBLIC_CHANNEL = "gateway-service-public"
 )

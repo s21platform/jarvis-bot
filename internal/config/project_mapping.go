@@ -69,6 +69,7 @@ func NewProjectMapping() *ProjectMapping {
 			// Tech Stream
 			model.TECH_STREAM_CHANNEL: {
 				ProjectKey: model.TECH_STREAM,
+				Label:      model.COMMON_LABEL,
 			},
 
 			// Evo
@@ -164,10 +165,36 @@ func NewProjectMapping() *ProjectMapping {
 				ProjectKey: model.OPTIONHUB_PROJECT,
 			},
 
-			// Metrics
+			// logger
 			model.LOGGER_LIB_CHANNEL: {
 				ProjectKey: model.TECH_STREAM,
 				Label:      model.LOGGER_LABEL,
+			},
+
+			// Metrics
+			model.METRICS_LIB_CHANNEL: {
+				ProjectKey: model.TECH_STREAM,
+				Label:      model.METRICS_LABEL,
+			},
+
+			// Kafka
+			model.KAFKA_LIB_CHANNEL: {
+				ProjectKey: model.TECH_STREAM,
+				Label:      model.KAFKA_LABEL,
+			},
+
+			// gateway
+			model.GATEWAY_SERVICE_CHANNEL: {
+				ProjectKey: model.TECH_STREAM,
+				Label:      model.GATEWAY_LABEL,
+			},
+			model.GATEWAY_SERVICE_NEWS_CHANNEL: {
+				ProjectKey: model.TECH_STREAM,
+				Label:      model.GATEWAY_LABEL,
+			},
+			model.GATEWAY_SERVICE_PUBLIC_CHANNEL: {
+				ProjectKey: model.TECH_STREAM,
+				Label:      model.GATEWAY_LABEL,
 			},
 		},
 	}

@@ -20,5 +20,9 @@ const (
 )
 
 var (
-	LOGGER_LABEL = lo.ToPtr("logger")
+	LOGGER_LABEL  = lo.ToPtr("logger")
+	COMMON_LABEL  = lo.ToPtr("common")
+	METRICS_LABEL = lo.ToPtr("metrics")
+	GATEWAY_LABEL = lo.ToPtr("gateway")
+	KAFKA_LABEL   = lo.ToPtr("kafka")
 )
