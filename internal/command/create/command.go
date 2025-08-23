@@ -69,7 +69,12 @@ func (c *Command) handleTask(title string) (string, error) {
 		return fmt.Sprintf("Канал %s не привязан к проекту Jira", ctx.Channel.Name), nil
 	}
 
-	key, err := c.jC.CreateIssue(title, "Task", ctx.ProjectKey)
+	var labels []string
+	if ctx.Label != nil {
+		labels = []string{*ctx.Label}
+	}
+
+	key, err := c.jC.CreateIssue(title, "Task", ctx.ProjectKey, labels)
 	if err != nil {
 		return "", fmt.Errorf("failed to create jira task: %w", err)
 	}
@@ -88,7 +93,12 @@ func (c *Command) handleBug(title string) (string, error) {
 		return fmt.Sprintf("Канал %s не привязан к проекту Jira", ctx.Channel.Name), nil
 	}
 
-	key, err := c.jC.CreateIssue(title, "Bug", ctx.ProjectKey)
+	var labels []string
+	if ctx.Label != nil {
+		labels = []string{*ctx.Label}
+	}
+
+	key, err := c.jC.CreateIssue(title, "Bug", ctx.ProjectKey, labels)
 	if err != nil {
 		return "", fmt.Errorf("failed to create jira bug: %w", err)
 	}

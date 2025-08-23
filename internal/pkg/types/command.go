@@ -36,7 +36,8 @@ type CommandContext struct {
 	Post       *model.Post
 	Channel    *model.Channel
 	User       *model.User
-	ProjectKey string // Ключ проекта Jira для текущего канала
+	ProjectKey string  // Ключ проекта Jira для текущего канала
+	Label      *string // Опциональная метка для задач из текущего канала
 }
 
 // Name возвращает имя команды
