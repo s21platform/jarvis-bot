@@ -17,6 +17,26 @@ type BirthdayPoolConfig struct {
 	PendingIntervalMinutes int      `json:"pending_interval_minutes"`
 }
 
+type BirthdayReminderConfig struct {
+	Enabled   bool `json:"enabled"`
+	HourStart int  `json:"hour_start"`
+	HourEnd   int  `json:"hour_finish"`
+}
+
+func (c *Config) GetBirthdayReminderConfig() BirthdayReminderConfig {
+	var config BirthdayReminderConfig
+	err := json.Unmarshal(c.Value, &config)
+	if err != nil {
+		log.Println("failed to unmarshal config, return default config: ", err)
+		return BirthdayReminderConfig{
+			Enabled:   false,
+			HourStart: 18,
+			HourEnd:   19,
+		}
+	}
+	return config
+}
+
 func (c *Config) GetBirthdayPoolConfig() BirthdayPoolConfig {
 	var config BirthdayPoolConfig
 	err := json.Unmarshal(c.Value, &config)

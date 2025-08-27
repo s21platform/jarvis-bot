@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -177,6 +178,47 @@ func (p *Postgres) GetBirthday(ctx context.Context, userId string) (*model.Birth
 		return nil, fmt.Errorf("failed to get birthday: %w", err)
 	}
 	return &birthday, nil
+}
+
+func (p *Postgres) GetAllBirthdays(ctx context.Context) (map[string]time.Time, error) {
+	query, args, err := sq.Select(
+		`user_id`,
+		`day`,
+		`month`,
+		`year`,
+	).From(`staff_birthday`).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to build query: %w", err)
+	}
+
+	type birthdayRow struct {
+		UserID string `db:"user_id"`
+		Day    int    `db:"day"`
+		Month  int    `db:"month"`
+		Year   *int   `db:"year"`
+	}
+
+	var rows []birthdayRow
+	err = p.conn.SelectContext(ctx, &rows, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get birthdays: %w", err)
+	}
+
+	birthdays := make(map[string]time.Time)
+	currentYear := time.Now().Year()
+
+	for _, row := range rows {
+		year := currentYear
+		if row.Year != nil {
+			year = *row.Year
+		}
+		birthdays[row.UserID] = time.Date(year, time.Month(row.Month), row.Day, 0, 0, 0, 0, time.UTC)
+	}
+
+	return birthdays, nil
 }
 
 func (p *Postgres) SetBirthday(ctx context.Context, birthday *model.Birthday, userId string, channelId string, nickname string) error {
