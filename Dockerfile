@@ -9,6 +9,7 @@ COPY . .
 
 RUN go build -o build/main cmd/bot/main.go
 RUN go build -o build/birthday_pool cmd/worker/birthday_pool/main.go
+RUN go build -o build/birthday_reminder cmd/worker/birthday_reminder/main.go
 RUN go build -o build/service cmd/service/main.go
 
 
@@ -18,5 +19,6 @@ WORKDIR /app
 
 COPY --from=builder /usr/src/service/build/main .
 COPY --from=builder /usr/src/service/build/birthday_pool .
+COPY --from=builder /usr/src/service/build/birthday_reminder .
 COPY --from=builder /usr/src/service/build/service .
-CMD "/app/main" & "/app/birthday_pool" & "/app/service"
+CMD "/app/main" & "/app/birthday_pool" & "/app/service" & "/app/birthday_reminder"
