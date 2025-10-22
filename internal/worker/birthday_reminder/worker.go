@@ -32,13 +32,18 @@ func (w *Worker) Run() {
 		startTime := time.Now().UnixNano()
 		w.metrics.Increment("birthday_reminder.worker.run.total")
 
-		check, err := w.rC.Get(context.Background(), "birthday_reminder_check")
+		// Формируем ключ с текущей датой для предотвращения повторной отправки в тот же день
+		today := time.Now().Format("2006-01-02")
+		lockKey := "birthday_reminder_sent:" + today
+
+		check, err := w.rC.Get(context.Background(), lockKey)
 		if err != nil {
 			log.Printf("Failed to get check: %v", err)
 			w.metrics.Increment("birthday_reminder.redis.errors")
 			continue
 		}
 		if check != "" {
+			log.Printf("Birthday reminders already sent today (%s)", today)
 			w.metrics.Increment("birthday_reminder.worker.skipped")
 			continue
 		}
@@ -64,7 +69,8 @@ func (w *Worker) Run() {
 
 		w.run()
 
-		err = w.rC.Set(context.Background(), "birthday_reminder_check", "true", 1*time.Hour)
+		// Устанавливаем lock на 24 часа, чтобы не отправлять напоминания повторно сегодня
+		err = w.rC.Set(context.Background(), lockKey, "true", 24*time.Hour)
 		if err != nil {
 			log.Printf("Failed to set check: %v", err)
 			w.metrics.Increment("birthday_reminder.redis.errors")
@@ -88,8 +94,9 @@ func (w *Worker) run() {
 
 	users, _, err := w.mC.GetUsers(0, 100, "")
 	if err != nil {
+		log.Printf("Failed to get users: %v", err)
 		w.metrics.Increment("birthday_reminder.mattermost.get_users.errors")
-		panic(err)
+		return
 	}
 
 	var processedUsers, skippedUsers, errorUsers, sentMessages int64
@@ -110,6 +117,9 @@ func (w *Worker) run() {
 	}
 
 	now := time.Now()
+	// Обнуляем время для корректного сравнения дат
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+
 	for userID, birthday := range birthdays {
 		user, exists := userMap[userID]
 		if !exists || user.DeleteAt != 0 {
@@ -118,12 +128,12 @@ func (w *Worker) run() {
 		}
 
 		// Вычисляем следующий день рождения
-		nextBirthday := time.Date(now.Year(), birthday.Month(), birthday.Day(), 0, 0, 0, 0, time.UTC)
-		if nextBirthday.Before(now) {
+		nextBirthday := time.Date(today.Year(), birthday.Month(), birthday.Day(), 0, 0, 0, 0, time.UTC)
+		if nextBirthday.Before(today) {
 			nextBirthday = nextBirthday.AddDate(1, 0, 0)
 		}
 
-		daysUntil := int(nextBirthday.Sub(now).Hours() / 24)
+		daysUntil := int(nextBirthday.Sub(today).Hours() / 24)
 
 		// Проверяем, нужно ли отправлять напоминание
 		if daysUntil != 7 && daysUntil != 3 && daysUntil != 0 {
@@ -133,12 +143,12 @@ func (w *Worker) run() {
 
 		// Отправляем напоминания всем пользователям, кроме именинника
 		for _, recipient := range users {
-			// Пропускаем удаленных пользователей
-			if recipient.DeleteAt != 0 {
+			// Пропускаем удаленных пользователей и ботов
+			if recipient.DeleteAt != 0 || recipient.IsBot {
 				continue
 			}
 
-			// Пропускаем именинника
+			// Пропускаем именинника - он не должен получать напоминание о себе
 			if recipient.Id == userID {
 				continue
 			}
