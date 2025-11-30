@@ -17,6 +17,7 @@ const (
 	SEARCH_PROJECT    = "SRC"
 	SOCIETY_PROJECT   = "STY"
 	OPTIONHUB_PROJECT = "OPT"
+	FLAGMAN_PROJECT   = "FLG"
 )
 
 var (
