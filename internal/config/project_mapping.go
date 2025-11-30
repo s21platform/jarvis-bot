@@ -196,6 +196,11 @@ func NewProjectMapping() *ProjectMapping {
 				ProjectKey: model.TECH_STREAM,
 				Label:      model.GATEWAY_LABEL,
 			},
+
+			// flagman
+			model.FLAGMAN_SERVICE_PUBLIC_CHANNEL: {
+				ProjectKey: model.FLAGMAN_PROJECT,
+			},
 		},
 	}
 }
