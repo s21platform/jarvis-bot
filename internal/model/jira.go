@@ -26,4 +26,5 @@ var (
 	METRICS_LABEL = lo.ToPtr("metrics")
 	GATEWAY_LABEL = lo.ToPtr("gateway")
 	KAFKA_LABEL   = lo.ToPtr("kafka")
+	K8S_LABEL     = lo.ToPtr("k8s")
 )
