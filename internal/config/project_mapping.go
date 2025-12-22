@@ -201,6 +201,12 @@ func NewProjectMapping() *ProjectMapping {
 			model.FLAGMAN_SERVICE_PUBLIC_CHANNEL: {
 				ProjectKey: model.FLAGMAN_PROJECT,
 			},
+
+			// k8s
+			model.K8S_CHANNEL: {
+				ProjectKey: model.TECH_STREAM,
+				Label:      model.K8S_LABEL,
+			},
 		},
 	}
 }

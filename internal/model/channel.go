@@ -64,4 +64,6 @@ const (
 	GATEWAY_SERVICE_PUBLIC_CHANNEL = "gateway-service-public"
 
 	FLAGMAN_SERVICE_PUBLIC_CHANNEL = "flagman"
+
+	K8S_CHANNEL = "k8s"
 )
