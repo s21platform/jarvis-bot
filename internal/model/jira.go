@@ -18,6 +18,7 @@ const (
 	SOCIETY_PROJECT   = "STY"
 	OPTIONHUB_PROJECT = "OPT"
 	FLAGMAN_PROJECT   = "FLG"
+	WG_PROJECT        = "WGT"
 )
 
 var (
