@@ -66,4 +66,6 @@ const (
 	FLAGMAN_SERVICE_PUBLIC_CHANNEL = "flagman"
 
 	K8S_CHANNEL = "k8s"
+
+	WG_CHANNEL = "wg-team"
 )

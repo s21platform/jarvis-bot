@@ -207,6 +207,11 @@ func NewProjectMapping() *ProjectMapping {
 				ProjectKey: model.TECH_STREAM,
 				Label:      model.K8S_LABEL,
 			},
+
+			// WG Team
+			model.WG_CHANNEL: {
+				ProjectKey: model.WG_PROJECT,
+			},
 		},
 	}
 }
