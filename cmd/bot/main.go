@@ -1,41 +1,41 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/mattermost/mattermost-server/v6/model"
 
-	"github.com/s21platform/metrics-lib/pkg"
-
 	"github.com/s21platform/jarvis-bot/internal/command"
 	"github.com/s21platform/jarvis-bot/internal/config"
 	"github.com/s21platform/jarvis-bot/internal/jira"
 	"github.com/s21platform/jarvis-bot/internal/repository/postgres"
 	"github.com/s21platform/jarvis-bot/internal/service/bot"
+
+	"log"
 )
 
+// TODO: replace with real metrics implementation when metrics service is available
+type noopMetrics struct{}
+
+func (m *noopMetrics) Count(name string, value int64)        {}
+func (m *noopMetrics) Disconnect()                           {}
+func (m *noopMetrics) Duration(timestamp int64, name string) {}
+func (m *noopMetrics) Gauge(name string, value float64)      {}
+func (m *noopMetrics) Increment(name string)                 {}
+
 func main() {
-	// Канал для обработки сигналов завершения
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	cfg := config.MustLoadConfig()
 
-	metrics, err := pkg.NewMetrics(cfg.Metrics.Host, cfg.Metrics.Port, "jarvis-bot", cfg.Platform.Env)
-	if err != nil {
-		log.Fatalf("Failed to create metrics: %v", err)
-	}
-
-	// Инициализируем подключение к базе данных
 	db := postgres.New(cfg)
 	defer db.Close()
 
 	jiraClient := jira.New(cfg)
 
-	// Создаем клиента Mattermost и получаем информацию о пользователе
 	client := model.NewAPIv4Client(cfg.Bot.Url)
 	client.SetOAuthToken(cfg.Bot.Token)
 
@@ -44,17 +44,13 @@ func main() {
 		log.Fatalf("Не удалось получить информацию о пользователе: %v", err)
 	}
 
-	// Создаем фабрику команд
 	cmdFactory := command.NewFactory(client, user, db, jiraClient)
 
-	// Создаем и запускаем бота
-	b := bot.New(cfg, cmdFactory, metrics)
+	b := bot.New(cfg, cmdFactory, &noopMetrics{})
 	defer b.Close()
 
-	// Запускаем бота
 	b.Listen()
 
-	// Ожидаем сигнала завершения
 	<-sigChan
 	log.Println("Получен сигнал завершения, graceful shutdown...")
 }
